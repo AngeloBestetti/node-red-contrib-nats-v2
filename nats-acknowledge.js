@@ -1,0 +1,17 @@
+'use-strict'
+
+module.exports = function (RED) {
+  function NatsAcknowledgeNode (config) {
+    RED.nodes.createNode(this, config)
+    const node = this
+
+    // on input acknowled message
+    node.on('input', function (msg) {
+      if (msg.autoacknowledge === false) {
+        node.log('Acknowledging message')
+        msg.ack()
+      }
+    })
+  }
+  RED.nodes.registerType('nats-acknowledge', NatsAcknowledgeNode)
+}

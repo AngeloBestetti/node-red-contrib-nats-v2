@@ -1,0 +1,28 @@
+<script type="text/javascript">
+    RED.nodes.registerType('nats-server',{
+        category: 'config',
+        defaults: {
+            server: {required:true},
+            user: {required:true},
+            pass: {required:true},
+        },
+        label: function() {
+            return this.server;
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="nats-server">
+    <div class="form-row">
+        <label for="node-config-input-server"><i class="icon-bookmark"></i> Server</label>
+        <input type="text" id="node-config-input-server">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-user"><i class="icon-bookmark"></i> User</label>
+        <input type="text" id="node-config-input-user">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-pass"><i class="icon-bookmark"></i> Password</label>
+        <input type="password" id="node-config-input-pass">
+    </div>
+</script>

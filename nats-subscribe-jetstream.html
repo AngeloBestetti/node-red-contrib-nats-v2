@@ -1,0 +1,204 @@
+<script type="text/javascript">
+    RED.nodes.registerType('nats-subscribe', {
+        category: 'NATS',
+        color: '#FDF0C2',
+        defaults: {
+            name: {
+                value: ""
+            },
+            server: {
+                value: "",
+                type: "nats-server"
+            },
+            channel: {
+                value: "",
+                required: true
+            },
+            clientID: {
+                value: "",
+                required: true
+            },
+            start: {
+                value: "",
+                required: true
+            },
+            start_option: {
+                value: ""
+            },
+            durable: {
+                value: ""
+            },
+            durable_name: {
+                value: ""
+            },
+            queue_group: {
+                value: ""
+            },
+            queue_group_name: {
+                value: ""
+            },
+            autoacknowledge: {
+                value: true
+            },
+            ackwait: {
+                value: 30
+            },
+            rate_limit: {
+                value: ""
+            },
+            max_in_flight: {
+                value: ""
+            }
+
+        },
+        inputs: 0,
+        outputs: 1,
+        icon: "nats-icon-white.png",
+        label: function () {
+            return this.name || "nats-subscribe";
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="nats-subscribe">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-stack-exchange"></i> Name</label>        
+        <input type="text" id="node-input-name" placeholder="Name">        
+    </div>
+    <div class="form-row">
+        <label for="node-input-server"><i class="fa fa-server"></i> Server</label>
+        <input type="text" id="node-input-server" placeholder="localhost">
+    </div>
+    <div class="form-row">
+        <label for="node-input-channel"><i class="fa fa-stack-exchange"></i> Channel</label>
+        <input type="text" id="node-input-channel" placeholder="Channel">
+    </div>
+    <div class="form-row">
+        <label for="node-input-start"><i class="fa fa-stack-exchange"></i> Start</label>
+        <select id="node-input-start" style="width:70%">
+            <option value="last_reveived">Last received</option>
+            <option value="all">All</option>
+            <option value="at_sequence">At sequence</option>
+            <option value="at_date">At date</option>
+            <option value="at_time">At time</option>
+        </select>
+    </div>
+    <div>
+        <label for="node-input-start_option"><i class="fa fa-stack-exchange"></i> Start option</label>
+        <input type="text" id="node-input-start_option" placeholder="Start option" style="width:93%; margin-bottom:12px;">
+    </div>
+    <div class="form-row">
+        <input type="checkbox" id="node-input-durable" value="Durable" style="display:inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-durable" style="width: auto"></i> Durable subscription</label>       
+    </div>
+    <div">
+        <label for="node-input-durable_name"><i class="fa fa-stack-exchange"></i> Durable name</label>
+        <input type="text" id="node-input-durable_name" placeholder="Durable name" style="width:93%; margin-bottom:12px;">
+    </div>
+    <div class="form-row">
+            <input type="checkbox" id="node-input-queue_group" value="Group" style="display:inline-block; width: auto; vertical-align: top;">
+            <label for="node-input-queue_group" style="width: auto">Queue group</label>       
+    </div>
+    <div>
+            <label for="node-input-queue_group_name"><i class="fa fa-stack-exchange"></i> Queue group name</label>
+            <input type="text" id="node-input-queue_group_name" placeholder="Queue group name" style="width:93%; margin-bottom:12px;">
+        </div>
+    <div class="form-row">
+        <label for="node-input-clientID"><i class="fa fa-stack-exchange"></i> Client ID</label>
+        <input type="text" id="node-input-clientID" placeholder="Client ID">
+    </div>
+    <div class="form-row">
+        <input type="checkbox" id="node-input-autoacknowledge" value="AutoAcknowledge" style="display:inline-block checked; width: auto; vertical-align: top;">
+        <label for="node-input-autoacknowledge" style="width: auto"></i> Auto acknowledge messages from subscription</label>       
+    </div>
+    <div">
+        <label for="node-input-ackwait"><i class="fa fa-stack-exchange"></i> Acknowledge wait time in s</label>
+        <input type="text" id="node-input-ackwait" placeholder="Acknowledge wait time in s" style="width:93%; margin-bottom:12px;">
+    </div>
+    <div class="form-row">
+        <input type="checkbox" id="node-input-rate_limit" value="RateLimit" style="display:inline-block checked; width: auto; vertical-align: top;">
+        <label for="node-input-rate_limit" style="width: auto"></i> Rate Limit</label>       
+    </div>
+    <div">
+        <label for="node-input-max_in_flight"><i class="fa fa-stack-exchange"></i> Max unacknowledged messages</label>
+        <input type="text" id="node-input-max_in_flight" placeholder="Max unacknowledged messages" style="width:93%; margin-bottom:12px;">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="nats-subscribe">
+    <p>Subscribe to a NATS server</p>
+
+    <h3>Output</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">string</span></dt>
+        <dd>the standard output of the command.</dd>
+    </dl>
+    <dl class="message-properties">
+        <dt>sequence <span class="property-type">string</span></dt>
+        <dd>The sequence number of the nats message</dd>
+    </dl>
+    
+    <h3>Details</h3>    
+    <h4>Start option</h4>
+    <p>is only needed when start is set to 
+        <ol>
+            <li>At sequenc
+                <dl class="message-properties">
+                    <dt>Start option</dt>
+                    <dd>The number of the first returned message sequence</dd>
+                </dl>
+            </li>
+            <li>At date
+                <dl class="message-properties">
+                    <dt>Start option</dt>
+                    <dd>The date of the first returned message</dd>
+                </dl>
+            </li>
+            <li>At time
+                <dl class="message-properties">
+                    <dt>Start option</dt>
+                    <dd>The in ms into the past sinc when to return messages</dd>
+                </dl>
+            </li>
+        </ol>
+    </p>
+
+    <h4>Durable name</h4>
+    <p>is only needed when the durable subscription checkbox is ticked
+        <dl class="message-properties">
+            <dt>Durable name</dt>
+            <dd>With wich name is the durable set on the NATS server</dd>
+        </dl>
+    </p>
+
+    <h4>Queue group name</h4>
+    <p>is only needed when the queue group checkbox is ticked
+        <dl class="message-properties">
+            <dt>Queue group name</dt>
+            <dd>With wich name is the queue group set on the NATS server</dd>
+        </dl>
+    </p>
+
+    <h4>Auto acknowledge</h4>
+    <p>set this to acknowledge all incoming messages. If not set acknowledge message with the nats-sreaming-acknowledge Node</p>
+
+    <h4>Auto acknowledge time in s</h4>
+    <p>is only needed when the Auto acknowledge checkbox is not ticked
+        <dl class="message-properties">
+            <dt>Auto acknowledge time in s</dt>
+            <dd>The time in secounds after wich nats-straming should resend the message default is 30s</dd>
+        </dl>
+    </p>
+
+    <h4>Rate Limit</h4>
+    <pcheck this to set a rate limit of max unacknowledged messages</p>
+
+    <h4>Max unacknowledged messages</h4>
+    <p>is only needed when the Rate Limit checkbox ticked
+        <dl class="message-properties">
+            <dt>Max unacknowledged messages</dt>
+            <dd>The number of unacknowledged messages send by nats</dd>
+        </dl>
+    </p>
+    
+</script>

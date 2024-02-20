@@ -30,6 +30,7 @@
     "nodes": {
       "nats-publish": "nats-publish.js",
       "nats-subscribe": "nats-subscribe.js",
+      "nats-subscribe-jetstream": "nats-subscribe-jetstream.js",
       "nats-server": "nats-server.js",
       "nats-acknowledge": "nats-acknowledge.js"
     }

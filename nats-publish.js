@@ -28,8 +28,8 @@ module.exports = function (RED) {
       maxReconnectAttempts: -1,
       reconnectTimeWait: 1000,
     }
-    console.log("Config: ", this.config)
-    console.log("ConnectionOptions: ", ConnectionOptions)
+    // console.log("Config: ", this.config)
+    // console.log("ConnectionOptions: ", ConnectionOptions)
     
     const connectNats = () => {
       nc = connect.connect(ConnectionOptions).then((nc) => {
@@ -49,7 +49,7 @@ module.exports = function (RED) {
     (function reconnectHandler () {
       natsnc = connectNats()
     })()
-
+    
     // on input send message
     node.on('input', function (msg) {
       let message

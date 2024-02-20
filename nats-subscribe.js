@@ -1,222 +1,184 @@
-'use-strict'
+"use-strict";
 
-const stan = require('nats')
+const connect = require("nats");
 
 module.exports = function (RED) {
-  function NatsSubscribeNode (config) {
-    RED.nodes.createNode(this, config)
-    var node = this
-    setStatusRed()
-    this.server = RED.nodes.getNode(config.server)
-    let natsInstance = null
-    let nodeIsClosing = false
-    let subscription = null
-    let reconnectTimer = null
+  function NatsSubscribeNode(config) {
+    RED.nodes.createNode(this, config);
+    var node = this;
+    setStatusRed();
+
+    this.config = RED.nodes.getNode(config.server);
+    this.server = this.config.server;
+    this.user = this.config.user;
+    this.pass = this.config.pass;
+
+    const servers = this.server.split(",");
+
+    let nc = null;
+    let natsnc = null;
+    let nodeIsClosing = false;
+    let subscription = null;
+    let reconnectTimer = null;
+
+    ConnectionOptions = {
+      servers: servers,
+      user: this.user,
+      pass: this.pass,
+      maxReconnectAttempts: -1,
+      reconnectTimeWait: 1000,
+    };
+
+    // console.log("Config Subscription Connection: ", this.config);
+    // console.log("ConnectionOptions: ", ConnectionOptions);
 
     const connectNats = () => {
-      const instance = stan.connect(this.server.cluster, config.clientID, {
-        url: 'nats://' + this.server.server + ':' + this.server.port,
-        waitOnFirstConnect: true
-      })
-
-      instance.on('error', function (err) {
-        node.log(err)
-        node.error('Could not connect to server', err)
-      })
-
-      instance.on('connect', function () {
-        node.log('connected')
-        setStatusGreen()
-
-        const opts = instance.subscriptionOptions()
-
-        // set the starting point in the stream, default is last received
-        switch (config.start) {
-          case 'last_received':
-            opts.setStartWithLastReceived()
-            break
-          case 'all':
-            opts.setDeliverAllAvailable()
-            break
-          case 'at_sequence':
-            if (!isNaN(+config.start_option)) {
-              opts.setStartAtSequence(config.start_option)
-            } else {
-              setStatusRed()
-              node.error('Start option has to be a number', config.start_option)
-            }
-            break
-          case 'at_date':
-            if (checkDate(config.start_option)) {
-              const timeParts = config.start_option.split('-')
-              const startTime = new Date(timeParts[0], timeParts[1] - 1, timeParts[2], 0, 0, 0, 0)
-              opts.setStartTime(startTime)
-            } else {
-              setStatusRed()
-              node.error('Wrong format in start option. Has to be YYYY-MM-DD', config.start_option)
-            }
-            break
-          case 'at_time':
-            if (!isNaN(config.start_option)) {
-              opts.setStartAtTimeDelta(config.start_option)
-            } else {
-              setStatusRed()
-              node.error('Start option has to be a number', config.start_option)
-            }
-            break
-          default:
-            opts.setStartWithLastReceived()
-            break
-        }
-
-        // if durable is true sets it with durable_name
-        if (config.durable) {
-          opts.setDurableName(config.durable_name)
-        }
-
-        // if autoacknowledge is false set await time
-        if (config.autoacknowledge === false) {
-          if (!isNaN(config.ackwait)) {
-            opts.setManualAckMode(true)
-            opts.setAckWait(config.ackwait * 1000)
-          } else {
-            setStatusRed()
-            node.error('Acknowledge wait has to be a number', config.ackwait)
-          }
-        }
-
-        // if rate limit is true set max in flight
-        if (config.rate_limit === true) {
-          if (!isNaN(config.max_in_flight)) {
-            opts.setMaxInFlight(config.max_in_flight)
-          } else {
-            setStatusRed()
-            node.error(' Max unacknowledged messages has to be a number', config.ackwait)
-          }
-        }
-
-        // if queue group is true sets it with queue_group_name
-        if (config.queue_group) {
-          subscription = instance.subscribe(config.channel, config.queue_group_name, opts)
-        } else {
-          subscription = instance.subscribe(config.channel, opts)
-        }
-
-        // on nats-streaming message
-        subscription.on('ready', () => {
-          node.log('subscription is ready')
-          subscription.on('message', msg => handleMessage(msg))
+      nc = connect
+        .connect(ConnectionOptions)
+        .then((nc) => {
+          setStatusGreen();
+          natsnc = nc;
+          subs();
         })
-      })
+        .catch((err) => {
+          node.log(err);
+          setStatusRed();
+        });
 
-      instance.on('disconnect', () => {
-        node.log('disconnect')
-        setStatusRed()
-      })
+      return nc;
+    };
+    
 
-      instance.on('reconnect', () => {
-        node.log('reconnect')
-        setStatusGreen()
-      })
+    (function reconnectHandler() {
+      natsnc = connectNats();
+    })();
 
-      instance.on('connection_lost', (err) => node.log('connection_lost ' + err))
+    async function subs() {
+      //console.log("Config Subscribe Options: ", JSON.stringify(config, null, 2));
+      setStatusGreen();
+      
+      const sub = natsnc.subscribe(config.channel);
 
-      return instance
+      for await (const m of sub) {
+        handleMessage(m);
+        // if (argv.headers && m.headers) {
+        //   const h = [];
+        //   for (const [key, value] of m.headers) {
+        //     h.push(`${key}=${value}`);
+        //   }
+        //   console.log(`\t${h.join(";")}`);
+        // }
+      }
+      sub.unsubscribe();
+      nc.close();
     }
 
-    (function reconnectHandler () {
-      natsInstance = connectNats()
-      natsInstance.on('close', () => {
-        setStatusRed()
+    node.on("disconnect", () => {
+      node.log("disconnect");
+      setStatusRed();
+    });
+
+    node.on("reconnect", () => {
+      node.log("reconnect");
+      setStatusGreen();
+    });
+
+    node.on("connection_lost", (err) => node.log("connection_lost " + err));
+
+    (function reconnectHandler() {
+      natsnc = connectNats();
+      node.on("close", () => {
+        setStatusRed();
         if (reconnectTimer === null && nodeIsClosing === false) {
-          node.log('close received. Explicit reconnect attempt in 60 seconds.')
+          node.log("close received. Explicit reconnect attempt in 60 seconds.");
           reconnectTimer = setTimeout(() => {
-            reconnectHandler()
-            reconnectTimer = null
-          }, 1000 * 60)
+            reconnectHandler();
+            reconnectTimer = null;
+          }, 1000 * 60);
         } else {
-          node.log('Node in flow is shutting down, not attempting to reconenct.')
+          node.log(
+            "Node in flow is shutting down, not attempting to reconenct."
+          );
         }
 
-        natsInstance = null
-      })
-    })()
+        natsnc = null;
+      });
+    })();
 
     // on node close the nats stream subscription is and connection is also closed
-    node.on('close', function (done) {
-      setStatusRed()
+    node.on("close", function (done) {
+      setStatusRed();
       if (reconnectTimer !== null) {
-        clearTimeout(reconnectTimer)
+        clearTimeout(reconnectTimer);
       }
-      nodeIsClosing = true
+      nodeIsClosing = true;
       // if the subscription is durable do not unsubscribe
       if (config.durable) {
-        natsInstance.close()
-        done()
+        natsnc.close();
+        done();
       } else {
-        subscription.unsubscribe()
-        subscription.on('unsubscribed', function () {
-          natsInstance.close()
-          done()
-        })
+        subscription.unsubscribe();
+        subscription.on("unsubscribed", function () {
+          natsnc.close();
+          done();
+        });
       }
-    })
+    });
 
-    function handleMessage (msg) {
-      const boundAck = msg.ack.bind(msg)
+    function handleMessage(msg) {
       const msgToSend = {
-        payload: msg.getData(),
-        sequence: msg.getSequence(),
-        autoacknowledge: config.autoacknowledge,
+        payload: `${msg.data}`,
+        subject: msg.subject,
         streaming_msg: msg,
-        ack: boundAck
-      }
-      node.send(msgToSend)
+      };
+      node.send(msgToSend);
     }
 
-    function setStatusGreen () {
+    function setStatusGreen() {
       node.status({
-        fill: 'green',
-        shape: 'dot',
-        text: 'connected'
-      })
+        fill: "green",
+        shape: "dot",
+        text: "connected",
+      });
     }
 
-    function setStatusRed () {
+    function setStatusRed() {
       node.status({
-        fill: 'red',
-        shape: 'ring',
-        text: 'disconnected'
-      })
+        fill: "red",
+        shape: "ring",
+        text: "disconnected",
+      });
     }
 
     // checks if the string could be parsed to a date
-    function checkDate (dateString) {
-      const timeParts = dateString.split('-')
+    function checkDate(dateString) {
+      const timeParts = dateString.split("-");
 
       // timeParts has to have 3 parts
       if (!(Object.keys(timeParts).length > 2)) {
-        return false
+        return false;
       }
 
       // the first part is the year and has to be 4 digits
-      if (!(/^\d\d\d\d$/.test(timeParts[0]))) {
-        return false
+      if (!/^\d\d\d\d$/.test(timeParts[0])) {
+        return false;
       }
 
       // secound part is the month and has to be a number and between 1 and 12
-      if (!(!isNaN(timeParts[1]) && +timeParts[1] >= 1 && +timeParts[1] <= 12)) {
-        return false
+      if (
+        !(!isNaN(timeParts[1]) && +timeParts[1] >= 1 && +timeParts[1] <= 12)
+      ) {
+        return false;
       }
 
       // third part is the day and has to be a number and between 1 and 31
       if (isNaN(timeParts[2] && +timeParts[2] >= 1 && +timeParts[2] <= 31)) {
-        return false
+        return false;
       }
 
-      return true
+      return true;
     }
   }
 
-  RED.nodes.registerType('nats-subscribe', NatsSubscribeNode)
-}
+  RED.nodes.registerType("nats-subscribe", NatsSubscribeNode);
+};

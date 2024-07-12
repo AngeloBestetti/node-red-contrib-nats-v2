@@ -69,8 +69,8 @@ module.exports = function (RED) {
         //   console.log(`\t${h.join(";")}`);
         // }
       }
-      sub.unsubscribe();
-      nc.close();
+      await sub.drain();
+      nc.drain();
     }
 
     node.on("disconnect", () => {
@@ -114,12 +114,12 @@ module.exports = function (RED) {
       nodeIsClosing = true;
       // if the subscription is durable do not unsubscribe
       if (config.durable) {
-        natsnc.close();
+        natsnc.drain();
         done();
       } else {
         subscription.unsubscribe();
         subscription.on("unsubscribed", function () {
-          natsnc.close();
+          natsnc.drain();
           done();
         });
       }

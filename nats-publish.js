@@ -98,7 +98,7 @@ module.exports = function (RED) {
         shape: 'ring',
         text: 'disconnected'
       })
-      natsnc.close()
+      natsnc.drain()
     })
 
     function setStatusGreen () {

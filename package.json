@@ -1,6 +1,6 @@
 {
   "name": "@angelobestetti/node-red-contrib-nats-v2",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "NATS V2 Node-RED",
   "repository": "",
   "main": "nats-test.js",

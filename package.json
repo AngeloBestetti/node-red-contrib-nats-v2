@@ -1,44 +1,44 @@
 {
-  "name": "@angelobestetti/node-red-contrib-nats-v2",
-  "version": "1.0.7",
-  "description": "NATS V2 Node-RED",
-  "repository": "https://github.com/AngeloBestetti/node-red-contrib-nats-v2",
-  "homepage": "https://github.com/AngeloBestetti/node-red-contrib-nats-v2#readme",
-  "url": "https://github.com/AngeloBestetti/node-red-contrib-nats-v2",
-  "main": "nats-test.js",
-  "engines": {
-    "node": "^14.0.0 || ^16.0.0 || >=18.0.0"
-  },
-  "license": "MIT",
-  "scripts": {
-    "test": "test",
-    "lint": "eslint ."
-  },
-  "keywords": [
-    "node-red",
-    "nats",
-    "nats-v2"
-  ],
-  "author": "Angelo Bestetti",
-  "dependencies": {
-    "nats": "^2.28.0"
-  },
-  "devDependencies": {
-    "eslint": "6.8.0",
-    "eslint-config-standard": "14.1.0",
-    "eslint-plugin-import": "2.20.0",
-    "eslint-plugin-node": "11.0.0",
-    "eslint-plugin-promise": "4.2.1",
-    "eslint-plugin-standard": "4.0.1"
-  },
-  "node-red": {
-    "version": ">=2.0.0",
-    "nodes": {
-      "nats-publish": "nats-publish.js",
-      "nats-subscribe": "nats-subscribe.js",
-      "nats-subscribe-jetstream": "nats-subscribe-jetstream.js",
-      "nats-server": "nats-server.js",
-      "nats-acknowledge": "nats-acknowledge.js"
-    }
-  }
+	"name": "@angelobestetti/node-red-contrib-nats-v2",
+	"version": "1.0.7",
+	"description": "NATS V2 Node-RED",
+	"repository": "https://github.com/AngeloBestetti/node-red-contrib-nats-v2",
+	"homepage": "https://github.com/AngeloBestetti/node-red-contrib-nats-v2#readme",
+	"url": "https://github.com/AngeloBestetti/node-red-contrib-nats-v2",
+	"main": "nats-test.js",
+	"engines": {
+		"node": "^14.0.0 || ^16.0.0 || >=18.0.0"
+	},
+	"license": "MIT",
+	"scripts": {
+		"test": "test",
+		"lint": "eslint ."
+	},
+	"keywords": [
+		"node-red",
+		"nats",
+		"nats-v2"
+	],
+	"author": "Angelo Bestetti",
+	"dependencies": {
+		"nats": "^2.28.0"
+	},
+	"devDependencies": {
+		"eslint": "6.8.0",
+		"eslint-config-standard": "14.1.0",
+		"eslint-plugin-import": "2.20.0",
+		"eslint-plugin-node": "11.0.0",
+		"eslint-plugin-promise": "4.2.1",
+		"eslint-plugin-standard": "4.0.1"
+	},
+	"node-red": {
+		"version": ">=2.0.0",
+		"nodes": {
+			"nats-publish": "nats-publish.js",
+			"nats-subscribe": "nats-subscribe.js",
+			"nats-subscribe-jetstream": "nats-subscribe-jetstream.js",
+			"nats-server": "nats-server.js",
+			"nats-acknowledge": "nats-acknowledge.js"
+		}
+	}
 }

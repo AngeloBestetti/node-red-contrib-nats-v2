@@ -1,5 +1,5 @@
 <script type="text/javascript">
-    RED.nodes.registerType('nats-subscribe', {
+    RED.nodes.registerType('nats-subscribe-jetstream', {
         category: 'NATS',
         color: '#FDF0C2',
         defaults: {
@@ -55,12 +55,12 @@
         outputs: 1,
         icon: "nats-icon-white.png",
         label: function () {
-            return this.name || "nats-subscribe";
+            return this.name || "nats-subscribe-jetstream";
         }
     });
 </script>
 
-<script type="text/x-red" data-template-name="nats-subscribe">
+<script type="text/x-red" data-template-name="nats-subscribe-jetstream">
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-stack-exchange"></i> Name</label>        
         <input type="text" id="node-input-name" placeholder="Name">        
@@ -125,7 +125,7 @@
     </div>
 </script>
 
-<script type="text/x-red" data-help-name="nats-subscribe">
+<script type="text/x-red" data-help-name="nats-subscribe-jetstream">
     <p>Subscribe to a NATS server</p>
 
     <h3>Output</h3>

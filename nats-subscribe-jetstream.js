@@ -180,5 +180,5 @@ module.exports = function (RED) {
     }
   }
 
-  RED.nodes.registerType("nats-subscribe", NatsSubscribeNode);
+  RED.nodes.registerType("nats-subscribe-jetstream", NatsSubscribeNode);
 };

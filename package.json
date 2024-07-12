@@ -1,13 +1,13 @@
 {
   "name": "@angelobestetti/node-red-contrib-nats-v2",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "NATS V2 Node-RED",
   "repository": "https://github.com/AngeloBestetti/node-red-contrib-nats-v2",
   "homepage": "https://github.com/AngeloBestetti/node-red-contrib-nats-v2#readme",
   "url": "https://github.com/AngeloBestetti/node-red-contrib-nats-v2",
   "main": "nats-test.js",
   "engines": {
-    "node": "=> 14.x"
+    "node": "^14.0.0 || ^16.0.0 || >=18.0.0"
   },
   "license": "MIT",
   "scripts": {
